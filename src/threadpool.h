@@ -28,10 +28,10 @@ class ThreadPool final
         static ThreadPool& pool();
 
     public:
-        template<typename F>
-        auto submit(F&& func) -> std::future<std::invoke_result_t<std::decay_t<F>>>
+        template<typename F, typename... Args>
+        auto submit(F&& func, Args&&... args) -> std::future<std::invoke_result_t<F, Args...>>
         {
-            using R = std::invoke_result_t<std::decay_t<F>>;
+            using R = std::invoke_result_t<F, Args...>;
 
             /**
              * make a task out of the passed function.
@@ -42,7 +42,7 @@ class ThreadPool final
              * std::forward preserves the leftness/rightness of a function. without it, f is always an lvalue, which means that it would always be copied, resulting in expensive copies or information loss.
              * r-value functions are moved, l-value functions are copied.
              */
-            std::shared_ptr<std::packaged_task<R()>> task = std::make_shared<std::packaged_task<R()>>(std::forward<F>(func));
+            std::shared_ptr<std::packaged_task<R()>> task = std::make_shared<std::packaged_task<R()>>(std::bind(std::forward<F>(func), std::forward<Args>(args)...));
             std::future<R> f = task->get_future();
 
             /**
