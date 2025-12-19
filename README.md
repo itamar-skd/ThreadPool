@@ -10,11 +10,24 @@ For a more detailed overview of the algorithm, please see the next section.
 
 ## Usage Example
 ```cpp
-auto future = ThreadPool::pool().submit([] {
-    return 42;
-});
+int main(int argc, char** argv)
+{
+    auto future = ThreadPool::pool().submit([] {
+        return 42;
+    });
 
-std::cout << future.get() << std::endl;
+    std::cout << future.get() << std::endl;
+}
+```
+
+```cpp
+inline double add(double a, double b) { return a + b; }
+
+int main(int argc, char** argv)
+{
+    auto future = ThreadPool::pool().submit(add, 1.0, 3.0);
+    std::cout << future.get() << std::endl; // 4.0
+}
 ```
 
 ## How does a Thread Pool work?
